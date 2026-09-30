@@ -22,13 +22,19 @@ Right-click the table to open it.
 - **Input slot (left):** put items in and they are consumed instantly - their EMC is added to
   your balance, and the item is added to your known list. Shift-clicking from your inventory
   sends items here.
-- **Known list (right):** everything you have learnt, cheapest first, with its EMC cost.
-  Rows you cannot currently afford are tinted red.
+- **Search box (top):** type to filter the known list by item name or id.
+- **Known list (right):** everything you have learnt, with its icon and EMC cost, cheapest first.
+  Rows you cannot currently afford are tinted red. Hover a row for the item's tooltip.
   - Left-click: withdraw one
   - Shift-click: withdraw a stack (or as many as you can afford)
 - Your balance is shown in the top right.
 
 EMC and knowledge are **per player**, saved with the world.
+
+## EMC tooltips
+Every item with a value shows `EMC: <value>` in its tooltip (and `Stack EMC` for stacks).
+Press **H** (rebindable under Controls > EMC Table) to turn this on or off - it works in-game
+and inside inventories. The choice is saved in `config/emctable.properties`.
 
 ## Crafting
 ```
