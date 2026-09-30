@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "id": "emctable",
+  "version": "${version}",
+  "name": "EMC Table",
+  "description": "Values every item in EMC. Feed items to the table to learn them and bank their EMC, then withdraw anything you have learnt.",
+  "authors": [],
+  "license": "ARR",
+  "icon": "assets/emctable/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": ["dev.emctable.EmcTableMod"],
+    "client": ["dev.emctable.EmcTableClient"]
+  },
+  "depends": {
+    "fabricloader": ">=0.19.3",
+    "minecraft": "~26.2",
+    "java": ">=25",
+    "fabric-api": "*"
+  }
+}
