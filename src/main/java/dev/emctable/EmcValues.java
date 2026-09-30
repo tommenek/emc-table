@@ -205,7 +205,7 @@ public final class EmcValues {
         for (Ingredient ingredient : ingredients) {
             long cheapest = Long.MAX_VALUE;
             for (var entry : ingredient.items().toList()) {
-                Long value = VALUES.get(entry.value().builtInRegistryHolder().key().location().toString());
+                Long value = VALUES.get(key(entry.value()));
                 if (value != null && value < cheapest) {
                     cheapest = value;
                 }
