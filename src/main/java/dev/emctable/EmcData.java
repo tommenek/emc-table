@@ -24,7 +24,7 @@ public class EmcData extends SavedData {
     ).apply(instance, EmcData::new));
 
     public static final SavedDataType<EmcData> TYPE =
-            new SavedDataType<>("emctable", EmcData::new, CODEC);
+            new SavedDataType<>(EmcTableMod.id("emc_data"), EmcData::new, CODEC, null);
 
     private final Map<UUID, Long> emc = new HashMap<>();
     private final Map<UUID, Set<String>> knowledge = new HashMap<>();

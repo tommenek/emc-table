@@ -1,8 +1,4 @@
-net.minecraft.world.item.crafting.Recipe
-net.minecraft.world.item.crafting.ShapedRecipe
-net.minecraft.world.item.crafting.ShapelessRecipe
-net.minecraft.world.item.crafting.SingleItemRecipe
-net.minecraft.world.item.crafting.AbstractCookingRecipe
-net.minecraft.world.level.saveddata.SavedDataType
-net.minecraft.client.input.MouseButtonEvent
-net.minecraft.client.input.InputWithModifiers
+net.minecraft.world.item.crafting.display.RecipeDisplay
+net.minecraft.world.item.crafting.display.SlotDisplay
+net.minecraft.world.item.crafting.display.SlotDisplayContext
+net.minecraft.world.item.crafting.Ingredient

@@ -197,7 +197,7 @@ public class EmcTableScreen extends AbstractContainerScreen<EmcTableMenu> {
             int row = (int) ((mouseY - (top + LIST_Y)) / ROW_H) + scroll;
             if (row >= 0 && row < known().size()) {
                 Payloads.Known entry = known().get(row);
-                int count = hasShiftDown() ? 64 : 1;
+                int count = event.hasShiftDown() ? 64 : 1;
                 net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.send(
                         new Payloads.Withdraw(entry.id(), count));
                 return true;

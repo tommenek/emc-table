@@ -109,7 +109,7 @@ public class EmcTableMenu extends AbstractContainerMenu {
             }
             Identifier identifier = Identifier.tryParse(id);
             Item item = identifier == null ? null : BuiltInRegistries.ITEM.getValue(identifier);
-            String name = item == null ? id : item.getName().getString();
+            String name = item == null ? id : item.getDefaultInstance().getHoverName().getString();
             known.add(new Payloads.Known(id, name, value));
         }
         known.sort((a, b) -> {

@@ -11,6 +11,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.display.RecipeDisplay;
+import net.minecraft.world.item.crafting.display.SlotDisplayContext;
 
 /**
  * Decides what everything is worth.
@@ -176,7 +178,13 @@ public final class EmcValues {
     private static boolean derive(MinecraftServer server, Recipe<?> recipe) {
         ItemStack result;
         try {
-            result = recipe.getResultItem(server.registryAccess());
+            // recipes no longer expose their result directly; read it from what the recipe book shows
+            List<RecipeDisplay> displays = recipe.display();
+            if (displays.isEmpty()) {
+                return false;
+            }
+            result = displays.getFirst().result()
+                    .resolveForFirstStack(SlotDisplayContext.fromLevel(server.overworld()));
         } catch (Exception e) {
             return false; // special/dynamic recipes have no fixed result
         }
@@ -196,7 +204,7 @@ public final class EmcValues {
         }
         for (Ingredient ingredient : ingredients) {
             long cheapest = Long.MAX_VALUE;
-            for (var entry : ingredient.items()) {
+            for (var entry : ingredient.items().toList()) {
                 Long value = VALUES.get(entry.value().builtInRegistryHolder().key().location().toString());
                 if (value != null && value < cheapest) {
                     cheapest = value;
