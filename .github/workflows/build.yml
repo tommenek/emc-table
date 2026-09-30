@@ -34,8 +34,7 @@ jobs:
         run: |
           join() { awk '{gsub(/%/,"%25"); printf "%s%%0A", $0}'; }
           mc=$(find ~/.gradle/caches/fabric-loom -name 'minecraft-merged.jar' | head -1)
-          fabric=$(find ~/.gradle/caches -name 'fabric-*.jar' -not -name '*sources*' | tr '
-' ':')
+          fabric=$(find ~/.gradle/caches -name 'fabric-*.jar' -not -name '*sources*' | paste -sd ':')
           cp="$mc:$fabric"
           if [ -f .github/api-grep.txt ]; then
             for jar in $mc $(echo "$fabric" | tr ':' ' '); do unzip -Z1 "$jar" 2>/dev/null; done | grep '\.class$' | grep -v '\$' | sort -u > classes.txt
