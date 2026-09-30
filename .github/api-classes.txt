@@ -1,5 +1,0 @@
-net.fabricmc.fabric.api.client.screen.v1.ScreenKeyboardEvents$AfterKeyPress
-net.fabricmc.fabric.api.client.screen.v1.ScreenEvents$AfterInit
-net.minecraft.client.player.LocalPlayer [Mm]essage
-net.minecraft.world.entity.player.Player [Mm]essage
-net.fabricmc.fabric.api.networking.v1.PacketSender sendPacket

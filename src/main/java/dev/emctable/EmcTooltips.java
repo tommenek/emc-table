@@ -97,8 +97,8 @@ public final class EmcTooltips {
         save();
         Minecraft client = Minecraft.getInstance();
         if (client.player != null) {
-            client.player.displayClientMessage(Component.literal("EMC tooltips " + (enabled ? "on" : "off"))
-                    .withStyle(enabled ? ChatFormatting.GREEN : ChatFormatting.RED), true);
+            client.player.sendOverlayMessage(Component.literal("EMC tooltips " + (enabled ? "on" : "off"))
+                    .withStyle(enabled ? ChatFormatting.GREEN : ChatFormatting.RED));
         }
     }
 
