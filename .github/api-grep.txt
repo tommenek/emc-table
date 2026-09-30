@@ -1,3 +1,0 @@
-KeyMapping|KeyBinding
-[Tt]ooltip.*(Callback|Event)
-ServerPlayConnectionEvents|ClientPlayConnectionEvents|ClientTickEvents

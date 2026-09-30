@@ -42,9 +42,10 @@ jobs:
               echo "::warning::grep $pat%0A$(grep -iE "$pat" classes.txt | head -40 | join)"
             done < .github/api-grep.txt
           fi
-          for c in $(cat .github/api-classes.txt 2>/dev/null); do
-            echo "::warning::$(javap -cp "$cp" "$c" 2>&1 | grep -v 'lambda\$' | head -150 | join)"
-          done
+          # each line: <class> [optional regex to keep only matching members]
+          while read -r c filter; do
+            echo "::warning::$(javap -cp "$cp" "$c" 2>&1 | grep -v 'lambda\$' | grep -E "${filter:-.}" | head -150 | join)"
+          done < <(cat .github/api-classes.txt 2>/dev/null)
       - uses: actions/upload-artifact@v5
         with:
           name: emc-table-jar

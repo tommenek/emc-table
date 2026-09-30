@@ -1,5 +1,9 @@
-net.minecraft.client.gui.GuiGraphicsExtractor
-net.minecraft.client.gui.components.EditBox
-net.minecraft.client.KeyMapping
-net.minecraft.client.gui.screens.inventory.AbstractContainerScreen
-net.minecraft.client.input.KeyEvent
+net.minecraft.client.gui.GuiGraphicsExtractor [Ii]tem|[Tt]ooltip
+net.minecraft.client.KeyMapping$Category
+net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper
+net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback
+net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents
+net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents$Join
+net.minecraft.client.gui.screens.Screen addRenderableWidget|setFocused|getFocused|charTyped|init
+net.minecraft.world.item.TooltipFlag
+net.minecraft.world.item.Item$TooltipContext
