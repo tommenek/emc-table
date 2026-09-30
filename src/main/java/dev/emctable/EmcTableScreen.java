@@ -48,6 +48,12 @@ public class EmcTableScreen extends AbstractContainerScreen<EmcTableMenu> {
     private static final int VISIBLE_ROWS = 5;
     private static final int LIST_H = VISIBLE_ROWS * ROW_H;
 
+    /** The "feed items" panel on the left, bottom-aligned with the list; the input slot is centred in it. */
+    private static final int FEED_X = 8;
+    private static final int FEED_Y = 76;
+    private static final int FEED_W = 40;
+    private static final int FEED_H = LIST_Y + LIST_H - FEED_Y;
+
     private static final int ROW_BG = 0xFF1D1A26;
     private static final int ROW_BG_ALT = 0xFF221E2C;
     private static final int ROW_HOVER = 0xFF3C3560;
@@ -153,6 +159,10 @@ public class EmcTableScreen extends AbstractContainerScreen<EmcTableMenu> {
         g.pose().popMatrix();
     }
 
+    private void smallCentredText(GuiGraphicsExtractor g, Component text, int centreX, int y, int colour) {
+        smallText(g, text, centreX - Math.round(this.font.width(text) * 0.75F / 2), y, colour);
+    }
+
     /** Cuts text down to fit the given width, adding ".." when it had to be shortened. */
     private String fit(String text, int width) {
         if (this.font.width(text) <= width) {
@@ -176,7 +186,7 @@ public class EmcTableScreen extends AbstractContainerScreen<EmcTableMenu> {
                 0.0F, (float) STRIP_V, 176, STRIP_H, 256, 256);
 
         // input panel on the left
-        panel(g, left + 8, top + 76, 36, 62, PANEL_LIGHT);
+        panel(g, left + FEED_X, top + FEED_Y, FEED_W, FEED_H, PANEL_LIGHT);
         slotBox(g, left + EmcTableMenu.INPUT_SLOT_X, top + EmcTableMenu.INPUT_SLOT_Y);
 
         // the list of learnt items
@@ -239,8 +249,9 @@ public class EmcTableScreen extends AbstractContainerScreen<EmcTableMenu> {
         if (!query.isBlank()) {
             smallText(g, Component.literal(known().size() + " found"), 8, LIST_Y + 11, TEXT_DIM);
         }
-        smallText(g, Component.literal("Feed items"), 11, 80, TEXT_DIM);
-        smallText(g, Component.literal("to learn"), 11, 89, TEXT_DIM);
+        int feedCentre = FEED_X + FEED_W / 2;
+        smallCentredText(g, Component.literal("Feed items"), feedCentre, FEED_Y + 5, TEXT_DIM);
+        smallCentredText(g, Component.literal("to learn"), feedCentre, FEED_Y + 13, TEXT_DIM);
 
         int detailY = LIST_Y + LIST_H + 4;
         if (hoveredRow >= 0 && hoveredRow < known().size()) {

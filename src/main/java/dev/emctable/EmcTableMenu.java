@@ -28,8 +28,8 @@ import net.minecraft.world.item.ItemStack;
  */
 public class EmcTableMenu extends AbstractContainerMenu {
 
-    public static final int INPUT_SLOT_X = 26;
-    public static final int INPUT_SLOT_Y = 100;
+    public static final int INPUT_SLOT_X = 20;
+    public static final int INPUT_SLOT_Y = 102;
     public static final int INVENTORY_X = 35;
     public static final int INVENTORY_Y = 160;
     public static final int HOTBAR_Y = 218;
