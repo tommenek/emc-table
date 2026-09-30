@@ -51,3 +51,21 @@ trivialise resource gathering. Values in `EmcValues.baseValues()` are yours to t
 Known sharp edges to watch for, as in ProjectE: items that can be farmed in bulk but derive a
 high value through some recipe chain can become infinite-EMC loops. If you find one, lower its
 base value or give it an explicit value.
+
+## EMC Orb
+A dense store of value - worth about **1,024,000 EMC**, worked out from its recipe like
+everything else. Feed it to a table for a big deposit, or use it to craft the tablet.
+```
+Diamond Block   Emerald Block   Diamond Block
+Emerald Block   Nether Star     Emerald Block
+Diamond Block   Emerald Block   Diamond Block
+```
+
+## Transmutation Tablet
+A wireless transmutation table: right-click it anywhere to open the same EMC menu, with the
+same balance and knowledge. Costs roughly **4.1 million EMC** worth of materials.
+```
+EMC Orb       Ender Chest           EMC Orb
+Ender Chest   Transmutation Table   Ender Chest
+EMC Orb       Ender Chest           EMC Orb
+```
