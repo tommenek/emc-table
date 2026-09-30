@@ -26,6 +26,10 @@ public class EmcTableMod implements ModInitializer {
         ModRegistry.init();
         CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS)
                 .register(output -> output.accept(ModRegistry.EMC_TABLE_ITEM));
+        CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES)
+                .register(output -> output.accept(ModRegistry.TRANSMUTATION_TABLET));
+        CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS)
+                .register(output -> output.accept(ModRegistry.EMC_ORB));
 
         PayloadTypeRegistry.clientboundPlay().register(Payloads.TableData.TYPE, Payloads.TableData.CODEC);
         PayloadTypeRegistry.clientboundPlay().register(Payloads.Values.TYPE, Payloads.Values.CODEC);

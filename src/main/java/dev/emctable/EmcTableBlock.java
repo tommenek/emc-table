@@ -3,7 +3,6 @@ package dev.emctable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -21,15 +20,8 @@ public class EmcTableBlock extends Block {
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player,
                                                BlockHitResult hit) {
-        if (!level.isClientSide()) {
-            player.openMenu(new SimpleMenuProvider(
-                    (containerId, inventory, ignored) -> new EmcTableMenu(containerId, inventory, pos),
-                    this.getName()));
-            // the client only has its screen once openMenu has run, so sync after it
-            if (player instanceof ServerPlayer serverPlayer
-                    && serverPlayer.containerMenu instanceof EmcTableMenu menu) {
-                menu.syncToClient(serverPlayer);
-            }
+        if (player instanceof ServerPlayer serverPlayer) {
+            EmcTableMenu.open(serverPlayer, pos, this.getName());
         }
         return InteractionResult.SUCCESS;
     }

@@ -1,5 +1,7 @@
 {
   "block.emctable.emc_table": "Transmutation Table",
   "key.category.emctable.emctable": "EMC Table",
-  "key.emctable.toggle_tooltips": "Toggle EMC Tooltips"
+  "key.emctable.toggle_tooltips": "Toggle EMC Tooltips",
+  "item.emctable.emc_orb": "EMC Orb",
+  "item.emctable.transmutation_tablet": "Transmutation Tablet"
 }

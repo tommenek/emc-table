@@ -12,6 +12,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -37,6 +38,7 @@ public class EmcTableMenu extends AbstractContainerMenu {
     private static final int PLAYER_START = 1;
     private static final int PLAYER_END = PLAYER_START + 36;
 
+    /** The table's position, or null when opened from a tablet (or on the client). */
     private final BlockPos pos;
     private final SimpleContainer container = new SimpleContainer(1);
 
@@ -46,7 +48,7 @@ public class EmcTableMenu extends AbstractContainerMenu {
 
     /** Client constructor, used by the registered MenuType. */
     public EmcTableMenu(int containerId, Inventory playerInventory) {
-        this(containerId, playerInventory, BlockPos.ZERO);
+        this(containerId, playerInventory, null);
     }
 
     public EmcTableMenu(int containerId, Inventory playerInventory, BlockPos pos) {
@@ -76,6 +78,20 @@ public class EmcTableMenu extends AbstractContainerMenu {
         public boolean mayPlace(ItemStack stack) {
             return EmcValues.hasValue(stack);
         }
+    }
+
+    /** Opens the table menu for a player: at a placed table, or anywhere when pos is null (tablet). */
+    public static void open(ServerPlayer player, BlockPos pos, Component title) {
+        player.openMenu(new SimpleMenuProvider(
+                (containerId, inventory, ignored) -> new EmcTableMenu(containerId, inventory, pos), title));
+        // the client only has its screen once openMenu has run, so sync after it
+        if (player.containerMenu instanceof EmcTableMenu menu) {
+            menu.syncToClient(player);
+        }
+    }
+
+    private BlockPos soundPos(Player player) {
+        return pos != null ? pos : player.blockPosition();
     }
 
     // ---------- client side ----------
@@ -144,7 +160,7 @@ public class EmcTableMenu extends AbstractContainerMenu {
                 (isNew ? "Learnt " : "Absorbed ") + stack.getCount() + "x " + stack.getHoverName().getString()
                         + "  (+" + gained + " EMC)")
                 .withStyle(isNew ? ChatFormatting.AQUA : ChatFormatting.GRAY));
-        serverPlayer.level().playSound(null, pos,
+        serverPlayer.level().playSound(null, soundPos(serverPlayer),
                 isNew ? SoundEvents.PLAYER_LEVELUP : SoundEvents.AMETHYST_BLOCK_CHIME,
                 SoundSource.BLOCKS, 0.6F, 1.4F);
         syncToClient(serverPlayer);
@@ -181,7 +197,7 @@ public class EmcTableMenu extends AbstractContainerMenu {
             return;
         }
         player.getInventory().placeItemBackInInventory(new ItemStack(item, count));
-        player.level().playSound(null, pos, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.BLOCKS, 0.6F, 1.0F);
+        player.level().playSound(null, soundPos(player), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.BLOCKS, 0.6F, 1.0F);
         syncToClient(player);
         broadcastChanges();
     }
@@ -230,7 +246,7 @@ public class EmcTableMenu extends AbstractContainerMenu {
 
     @Override
     public boolean stillValid(Player player) {
-        return pos.equals(BlockPos.ZERO)
+        return pos == null
                 || player.distanceToSqr(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5) <= 64.0;
     }
 
