@@ -32,7 +32,8 @@ jobs:
         if: failure() && hashFiles('.github/api-classes.txt') != ''
         run: |
           join() { awk '{gsub(/%/,"%25"); printf "%s%%0A", $0}'; }
-          jar=$(find ~/.gradle/caches .gradle -name "*.jar" 2>/dev/null | grep -i minecraft | grep -iv sources | grep 26.2 | xargs ls -S | head -1)
+          echo "::warning::$(find ~/.gradle/caches/fabric-loom -name '*.jar' | join)"
+          jar=$(find ~/.gradle/caches/fabric-loom -name '*.jar' | grep -iE 'common|merged|client' | grep -v sources | head -1)
           echo "::warning::jar $jar"
           for c in $(cat .github/api-classes.txt); do
             echo "::warning::$(javap -cp "$jar" "$c" 2>&1 | grep -v 'lambda\$' | head -150 | join)"
