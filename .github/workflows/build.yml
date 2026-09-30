@@ -21,9 +21,21 @@ jobs:
       - name: Report errors
         if: failure()
         run: |
-          # surface compiler and gradle errors as annotations so they are readable without opening the log
-          grep -E "error:|What went wrong|Could not|FAILURE|Exception" -A 3 build.log | head -60 | while IFS= read -r line; do
-            echo "::error::${line}"
+          # GitHub shows few annotations per step, so pack many lines into each (%0A is a newline)
+          join() { awk '{gsub(/%/,"%25"); printf "%s%%0A", $0}'; }
+          grep -E "error:" -A 4 build.log > errors.txt || grep -E "What went wrong" -A 15 build.log > errors.txt || true
+          split -l 40 errors.txt chunk_
+          for f in chunk_*; do
+            echo "::error::$(join < "$f")"
+          done
+      - name: Dump API
+        if: failure() && hashFiles('.github/api-classes.txt') != ''
+        run: |
+          join() { awk '{gsub(/%/,"%25"); printf "%s%%0A", $0}'; }
+          jar=$(find ~/.gradle/caches .gradle -name "*.jar" 2>/dev/null | grep -i minecraft | grep -iv sources | grep 26.2 | xargs ls -S | head -1)
+          echo "::warning::jar $jar"
+          for c in $(cat .github/api-classes.txt); do
+            echo "::warning::$(javap -cp "$jar" "$c" 2>&1 | grep -v 'lambda\$' | head -150 | join)"
           done
       - uses: actions/upload-artifact@v5
         with:

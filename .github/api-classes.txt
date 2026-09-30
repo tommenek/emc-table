@@ -1,0 +1,6 @@
+net.minecraft.world.item.crafting.Recipe
+net.minecraft.world.item.Item
+net.minecraft.world.level.saveddata.SavedDataType
+net.minecraft.world.item.crafting.Ingredient
+net.minecraft.world.item.crafting.RecipeHolder
+net.minecraft.world.item.crafting.RecipeManager
