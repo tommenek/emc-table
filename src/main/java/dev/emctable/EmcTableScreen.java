@@ -1,13 +1,22 @@
 package dev.emctable;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.ItemStack;
 
 /**
  * The transmutation table screen. Everything is painted with filled rectangles and text, apart
@@ -31,10 +40,12 @@ public class EmcTableScreen extends AbstractContainerScreen<EmcTableMenu> {
     private static final int EDGE_HI = 0xFF4E4668;
 
     private static final int LIST_X = 52;
-    private static final int LIST_Y = 34;
     private static final int LIST_W = 170;
-    private static final int ROW_H = 14;
-    private static final int VISIBLE_ROWS = 6;
+    private static final int SEARCH_Y = 20;
+    private static final int SEARCH_H = 12;
+    private static final int LIST_Y = 35;
+    private static final int ROW_H = 18;
+    private static final int VISIBLE_ROWS = 5;
     private static final int LIST_H = VISIBLE_ROWS * ROW_H;
 
     private static final int ROW_BG = 0xFF1D1A26;
@@ -51,6 +62,16 @@ public class EmcTableScreen extends AbstractContainerScreen<EmcTableMenu> {
     private static final int SLOT_BG = 0xFF15131C;
     private static final int SLOT_EDGE = 0xFF0A090E;
 
+    private EditBox search;
+    private String query = "";
+
+    /** The known list after filtering by the search box; rebuilt when either changes. */
+    private List<Payloads.Known> filtered = List.of();
+    private List<Payloads.Known> filteredFrom;
+    private String filteredFor;
+
+    private final Map<String, ItemStack> icons = new HashMap<>();
+
     private int scroll = 0;
     private int hoveredRow = -1;
 
@@ -62,8 +83,48 @@ public class EmcTableScreen extends AbstractContainerScreen<EmcTableMenu> {
         this.inventoryLabelY = STRIP_Y + 4;
     }
 
+    @Override
+    protected void init() {
+        super.init();
+        search = new EditBox(this.font, this.leftPos + LIST_X, this.topPos + SEARCH_Y, LIST_W, SEARCH_H,
+                Component.literal("Search"));
+        search.setHint(Component.literal("Search..."));
+        search.setMaxLength(50);
+        search.setValue(query); // keep the text when the window is resized
+        search.setResponder(text -> {
+            query = text;
+            scroll = 0;
+        });
+        addRenderableWidget(search);
+    }
+
     private List<Payloads.Known> known() {
-        return this.menu.clientKnown();
+        List<Payloads.Known> all = this.menu.clientKnown();
+        if (all != filteredFrom || !query.equals(filteredFor)) {
+            filteredFrom = all;
+            filteredFor = query;
+            String needle = query.trim().toLowerCase(Locale.ROOT);
+            if (needle.isEmpty()) {
+                filtered = all;
+            } else {
+                List<Payloads.Known> matches = new ArrayList<>();
+                for (Payloads.Known entry : all) {
+                    if (entry.name().toLowerCase(Locale.ROOT).contains(needle) || entry.id().contains(needle)) {
+                        matches.add(entry);
+                    }
+                }
+                filtered = matches;
+            }
+        }
+        return filtered;
+    }
+
+    private ItemStack icon(String id) {
+        return icons.computeIfAbsent(id, key -> {
+            Identifier identifier = Identifier.tryParse(key);
+            return identifier == null ? ItemStack.EMPTY
+                    : BuiltInRegistries.ITEM.getValue(identifier).getDefaultInstance();
+        });
     }
 
     private int maxScroll() {
@@ -90,6 +151,18 @@ public class EmcTableScreen extends AbstractContainerScreen<EmcTableMenu> {
         g.pose().scale(scale, scale);
         g.text(this.font, text, Math.round(x / scale), Math.round(y / scale), colour, false);
         g.pose().popMatrix();
+    }
+
+    /** Cuts text down to fit the given width, adding ".." when it had to be shortened. */
+    private String fit(String text, int width) {
+        if (this.font.width(text) <= width) {
+            return text;
+        }
+        String cut = text;
+        while (!cut.isEmpty() && this.font.width(cut + "..") > width) {
+            cut = cut.substring(0, cut.length() - 1);
+        }
+        return cut + "..";
     }
 
     @Override
@@ -132,12 +205,15 @@ public class EmcTableScreen extends AbstractContainerScreen<EmcTableMenu> {
                     : affordable ? (i % 2 == 0 ? ROW_BG : ROW_BG_ALT) : ROW_POOR;
             g.fill(rowX, rowY, rowX + LIST_W, rowY + ROW_H, background);
 
-            g.text(this.font, Component.literal(entry.name()), rowX + 4, rowY + 3,
-                    affordable ? TEXT : TEXT_RED, false);
-            String cost = String.valueOf(entry.value());
+            g.item(icon(entry.id()), rowX + 1, rowY + 1);
+
+            String cost = EmcTooltips.format(entry.value());
             int costWidth = this.font.width(cost);
-            g.text(this.font, Component.literal(cost), rowX + LIST_W - costWidth - 4, rowY + 3,
+            g.text(this.font, Component.literal(cost), rowX + LIST_W - costWidth - 4, rowY + 5,
                     affordable ? TEXT_EMC : TEXT_RED, false);
+            String name = fit(entry.name(), LIST_W - 20 - costWidth - 10);
+            g.text(this.font, Component.literal(name), rowX + 20, rowY + 5,
+                    affordable ? TEXT : TEXT_RED, false);
         }
 
         if (maxScroll() > 0) {
@@ -155,34 +231,44 @@ public class EmcTableScreen extends AbstractContainerScreen<EmcTableMenu> {
     protected void extractLabels(GuiGraphicsExtractor g, int mouseX, int mouseY) {
         g.text(this.font, this.title, this.titleLabelX, this.titleLabelY, TEXT_GOLD, false);
 
-        String balance = this.menu.clientBalance() + " EMC";
+        String balance = EmcTooltips.format(this.menu.clientBalance()) + " EMC";
         int width = this.font.width(balance);
         g.text(this.font, Component.literal(balance), PANEL_W - width - 10, this.titleLabelY, TEXT_EMC, false);
 
+        smallText(g, Component.literal(this.menu.clientKnown().size() + " known"), 8, LIST_Y + 2, TEXT_DIM);
+        if (!query.isBlank()) {
+            smallText(g, Component.literal(known().size() + " found"), 8, LIST_Y + 11, TEXT_DIM);
+        }
         smallText(g, Component.literal("Feed items"), 11, 80, TEXT_DIM);
         smallText(g, Component.literal("to learn"), 11, 89, TEXT_DIM);
-        smallText(g, Component.literal(known().size() + " known"), LIST_X, LIST_Y - 10, TEXT_DIM);
 
-        int detailY = LIST_Y + LIST_H + 5;
+        int detailY = LIST_Y + LIST_H + 4;
         if (hoveredRow >= 0 && hoveredRow < known().size()) {
             Payloads.Known entry = known().get(hoveredRow);
-            long balanceNow = this.menu.clientBalance();
-            long affordable = entry.value() > 0 ? balanceNow / entry.value() : 0;
-            smallText(g, Component.literal(entry.name() + "  -  " + entry.value() + " EMC each"),
-                    LIST_X, detailY, TEXT);
-            smallText(g, Component.literal("You can afford " + affordable),
-                    LIST_X, detailY + 9, affordable > 0 ? TEXT_EMC : TEXT_RED);
+            long affordable = entry.value() > 0 ? this.menu.clientBalance() / entry.value() : 0;
+            smallText(g, Component.literal("You can afford " + EmcTooltips.format(affordable)),
+                    LIST_X, detailY, affordable > 0 ? TEXT_EMC : TEXT_RED);
             smallText(g, Component.literal("Left-click: one  |  Shift-click: a stack"),
-                    LIST_X, detailY + 18, TEXT_DIM);
-        } else {
+                    LIST_X, detailY + 9, TEXT_DIM);
+        } else if (this.menu.clientKnown().isEmpty()) {
             smallText(g, Component.literal("Put items in the slot to bank their EMC and learn them."),
                     LIST_X, detailY, TEXT_DIM);
-            smallText(g, Component.literal("Hover a learnt item to withdraw it."),
-                    LIST_X, detailY + 9, TEXT_DIM);
+        } else if (known().isEmpty()) {
+            smallText(g, Component.literal("Nothing learnt matches your search."), LIST_X, detailY, TEXT_DIM);
+        } else {
+            smallText(g, Component.literal("Click a learnt item to withdraw it."), LIST_X, detailY, TEXT_DIM);
         }
 
         g.text(this.font, this.playerInventoryTitle,
                 this.inventoryLabelX, this.inventoryLabelY, 0xFF404040, false);
+    }
+
+    @Override
+    public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
+        super.extractRenderState(g, mouseX, mouseY, partialTick);
+        if (hoveredRow >= 0 && hoveredRow < known().size()) {
+            g.setTooltipForNextFrame(this.font, icon(known().get(hoveredRow).id()), mouseX, mouseY);
+        }
     }
 
     @Override
@@ -198,8 +284,7 @@ public class EmcTableScreen extends AbstractContainerScreen<EmcTableMenu> {
             if (row >= 0 && row < known().size()) {
                 Payloads.Known entry = known().get(row);
                 int count = event.hasShiftDown() ? 64 : 1;
-                net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.send(
-                        new Payloads.Withdraw(entry.id(), count));
+                ClientPlayNetworking.send(new Payloads.Withdraw(entry.id(), count));
                 return true;
             }
         }
@@ -207,6 +292,17 @@ public class EmcTableScreen extends AbstractContainerScreen<EmcTableMenu> {
         return super.mouseClicked(event, doubleClick);
     }
 
+    @Override
+    public boolean keyPressed(KeyEvent event) {
+        // while typing a search, keys like E must not close the screen or trigger hotkeys
+        if (search != null && search.isFocused() && !event.isEscape()) {
+            search.keyPressed(event);
+            return true;
+        }
+        return super.keyPressed(event);
+    }
+
+    @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
         if (maxScroll() > 0) {
             scroll = Math.max(0, Math.min(maxScroll(), scroll - (int) Math.signum(scrollY)));

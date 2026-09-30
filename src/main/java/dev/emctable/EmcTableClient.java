@@ -9,6 +9,10 @@ public class EmcTableClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         MenuScreens.register(ModRegistry.EMC_TABLE_MENU, EmcTableScreen::new);
+        EmcTooltips.init();
+
+        ClientPlayNetworking.registerGlobalReceiver(Payloads.Values.TYPE, (payload, context) ->
+                context.client().execute(() -> EmcTooltips.setValues(payload.values())));
 
         ClientPlayNetworking.registerGlobalReceiver(Payloads.TableData.TYPE, (payload, context) ->
                 context.client().execute(() -> {

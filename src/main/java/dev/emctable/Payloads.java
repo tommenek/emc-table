@@ -1,7 +1,9 @@
 package dev.emctable;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -67,6 +69,38 @@ public final class Payloads {
 
         private static Withdraw read(FriendlyByteBuf buf) {
             return new Withdraw(buf.readUtf(), buf.readVarInt());
+        }
+
+        @Override
+        public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+    }
+
+    /** Server -> client: every item's EMC value, so tooltips can show it anywhere. */
+    public record Values(Map<String, Long> values) implements CustomPacketPayload {
+
+        public static final CustomPacketPayload.Type<Values> TYPE =
+                new CustomPacketPayload.Type<>(EmcTableMod.id("values"));
+
+        public static final StreamCodec<FriendlyByteBuf, Values> CODEC =
+                StreamCodec.of(Values::write, Values::read);
+
+        private static void write(FriendlyByteBuf buf, Values payload) {
+            buf.writeVarInt(payload.values.size());
+            payload.values.forEach((id, value) -> {
+                buf.writeUtf(id);
+                buf.writeVarLong(value);
+            });
+        }
+
+        private static Values read(FriendlyByteBuf buf) {
+            int size = buf.readVarInt();
+            Map<String, Long> values = new HashMap<>(size);
+            for (int i = 0; i < size; i++) {
+                values.put(buf.readUtf(), buf.readVarLong());
+            }
+            return new Values(values);
         }
 
         @Override

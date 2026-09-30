@@ -226,6 +226,11 @@ public final class EmcValues {
         return false;
     }
 
+    /** A copy of every value, for sending to clients. */
+    public static Map<String, Long> snapshot() {
+        return Map.copyOf(VALUES);
+    }
+
     public static String key(Item item) {
         Identifier id = BuiltInRegistries.ITEM.getKey(item);
         return id == null ? "" : id.toString();
