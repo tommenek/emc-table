@@ -1,0 +1,5 @@
+net.minecraft.client.gui.GuiGraphicsExtractor
+net.minecraft.client.gui.components.EditBox
+net.minecraft.client.KeyMapping
+net.minecraft.client.gui.screens.inventory.AbstractContainerScreen
+net.minecraft.client.input.KeyEvent

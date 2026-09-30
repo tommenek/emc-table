@@ -29,14 +29,22 @@ jobs:
             echo "::error::$(join < "$f")"
           done
       - name: Dump API
-        if: failure() && hashFiles('.github/api-classes.txt') != ''
+        # debugging aid: list classes matching .github/api-grep.txt and javap those in .github/api-classes.txt
+        if: always() && (hashFiles('.github/api-classes.txt') != '' || hashFiles('.github/api-grep.txt') != '')
         run: |
           join() { awk '{gsub(/%/,"%25"); printf "%s%%0A", $0}'; }
-          echo "::warning::$(find ~/.gradle/caches/fabric-loom -name '*.jar' | join)"
-          jar=$(find ~/.gradle/caches/fabric-loom -name '*.jar' | grep -iE 'common|merged|client' | grep -v sources | head -1)
-          echo "::warning::jar $jar"
-          for c in $(cat .github/api-classes.txt); do
-            echo "::warning::$(javap -cp "$jar" "$c" 2>&1 | grep -v 'lambda\$' | head -150 | join)"
+          mc=$(find ~/.gradle/caches/fabric-loom -name 'minecraft-merged.jar' | head -1)
+          fabric=$(find ~/.gradle/caches -name 'fabric-*.jar' -not -name '*sources*' | tr '
+' ':')
+          cp="$mc:$fabric"
+          if [ -f .github/api-grep.txt ]; then
+            for jar in $mc $(echo "$fabric" | tr ':' ' '); do unzip -Z1 "$jar" 2>/dev/null; done | grep '\.class$' | grep -v '\$' | sort -u > classes.txt
+            while read -r pat; do
+              echo "::warning::grep $pat%0A$(grep -iE "$pat" classes.txt | head -40 | join)"
+            done < .github/api-grep.txt
+          fi
+          for c in $(cat .github/api-classes.txt 2>/dev/null); do
+            echo "::warning::$(javap -cp "$cp" "$c" 2>&1 | grep -v 'lambda\$' | head -150 | join)"
           done
       - uses: actions/upload-artifact@v5
         with:
