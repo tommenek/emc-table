@@ -115,8 +115,14 @@ final class TechRebornCompat {
         base.put("techreborn:rubber_log", 32L);
         base.put("techreborn:rubber_sapling", 32L);
         base.put("techreborn:rubber_leaves", 1L);
-        base.put("techreborn:sap", 16L);
         return base;
+    }
+
+    /** Values that recipes are not allowed to lower. */
+    static Map<String, Long> fixedValues() {
+        return Map.of(
+                "techreborn:sap", 64L,
+                "techreborn:rubber", 96L);
     }
 
     private static void ore(Map<String, Long> base, String name, long value) {

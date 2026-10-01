@@ -2,8 +2,10 @@ package dev.emctable;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
@@ -28,6 +30,9 @@ public final class EmcValues {
 
     /** item id -> emc. Filled once per server start. */
     private static final Map<String, Long> VALUES = new HashMap<>();
+
+    /** Item ids whose value is set by hand and must not be lowered by a cheaper recipe. */
+    private static final Set<String> FIXED = new HashSet<>();
 
     /** How many times to sweep the recipe list looking for newly derivable items. */
     private static final int PASSES = 12;
@@ -161,6 +166,10 @@ public final class EmcValues {
     public static void compute(MinecraftServer server) {
         VALUES.clear();
         VALUES.putAll(baseValues());
+        Map<String, Long> fixed = TechRebornCompat.fixedValues();
+        VALUES.putAll(fixed);
+        FIXED.clear();
+        FIXED.addAll(fixed.keySet());
 
         List<RecipeHolder<?>> recipes = List.copyOf(server.getRecipeManager().getRecipes());
         for (int pass = 0; pass < PASSES; pass++) {
@@ -207,6 +216,9 @@ public final class EmcValues {
 
         long each = Math.max(1L, total / shape.outputCount());
         String id = key(shape.output());
+        if (FIXED.contains(id)) {
+            return false;
+        }
         Long existing = VALUES.get(id);
         if (existing == null || each < existing) {
             VALUES.put(id, each);
