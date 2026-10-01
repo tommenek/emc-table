@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.saveddata.SavedData;
@@ -24,7 +25,8 @@ public class EmcData extends SavedData {
     ).apply(instance, EmcData::new));
 
     public static final SavedDataType<EmcData> TYPE =
-            new SavedDataType<>(EmcTableMod.id("emc_data"), EmcData::new, CODEC, null);
+            // keeps the id from before the mod was renamed, so existing worlds keep everyone's EMC
+            new SavedDataType<>(Identifier.fromNamespaceAndPath("emctable", "emc_data"), EmcData::new, CODEC, null);
 
     private final Map<UUID, Long> emc = new HashMap<>();
     private final Map<UUID, Set<String>> knowledge = new HashMap<>();

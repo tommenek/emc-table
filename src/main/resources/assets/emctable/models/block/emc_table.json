@@ -1,8 +1,0 @@
-{
-  "parent": "minecraft:block/cube_bottom_top",
-  "textures": {
-    "top": "emctable:block/emc_table_top",
-    "bottom": "emctable:block/emc_table_bottom",
-    "side": "emctable:block/emc_table_side"
-  }
-}

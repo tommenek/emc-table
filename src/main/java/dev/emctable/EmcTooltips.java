@@ -26,13 +26,13 @@ import org.lwjgl.glfw.GLFW;
 
 /**
  * Client side EMC values: shows each item's value in its tooltip, with a hotkey to switch that
- * on and off. The on/off choice is remembered in config/emctable.properties.
+ * on and off. The on/off choice is remembered in config/emcompacted.properties.
  */
 public final class EmcTooltips {
 
-    private static final Path CONFIG = FabricLoader.getInstance().getConfigDir().resolve("emctable.properties");
+    private static final Path CONFIG = FabricLoader.getInstance().getConfigDir().resolve("emcompacted.properties");
 
-    private static final KeyMapping.Category CATEGORY = KeyMapping.Category.register(EmcTableMod.id("emctable"));
+    private static final KeyMapping.Category CATEGORY = KeyMapping.Category.register(EmcTableMod.id("emcompacted"));
     private static KeyMapping toggleKey;
 
     /** As last sent by the server. */
@@ -45,7 +45,7 @@ public final class EmcTooltips {
     public static void init() {
         load();
         toggleKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
-                "key.emctable.toggle_tooltips", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_H, CATEGORY));
+                "key.emcompacted.toggle_tooltips", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_H, CATEGORY));
 
         // in-game, with no screen open
         ClientTickEvents.END_CLIENT_TICK.register(client -> {

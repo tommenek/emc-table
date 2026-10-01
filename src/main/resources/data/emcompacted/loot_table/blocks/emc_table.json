@@ -3,7 +3,7 @@
   "pools": [
     {
       "rolls": 1,
-      "entries": [ { "type": "minecraft:item", "name": "emctable:emc_table" } ],
+      "entries": [ { "type": "minecraft:item", "name": "emcompacted:emc_table" } ],
       "conditions": [ { "condition": "minecraft:survives_explosion" } ]
     }
   ]

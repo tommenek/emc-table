@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "top": "emcompacted:block/emc_table_top",
+    "bottom": "emcompacted:block/emc_table_bottom",
+    "side": "emcompacted:block/emc_table_side"
+  }
+}

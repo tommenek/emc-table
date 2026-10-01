@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "emctable:item/emc_orb"
+    "model": "emcompacted:item/emc_orb"
   }
 }

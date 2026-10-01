@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "emctable:item/transmutation_tablet"
+    "layer0": "emcompacted:item/transmutation_tablet"
   }
 }

@@ -2,9 +2,9 @@
   "type": "minecraft:crafting_shaped",
   "category": "equipment",
   "key": {
-    "O": "emctable:emc_orb",
+    "O": "emcompacted:emc_orb",
     "C": "minecraft:ender_chest",
-    "T": "emctable:emc_table"
+    "T": "emcompacted:emc_table"
   },
   "pattern": [
     "OCO",
@@ -12,6 +12,6 @@
     "OCO"
   ],
   "result": {
-    "id": "emctable:transmutation_tablet"
+    "id": "emcompacted:transmutation_tablet"
   }
 }

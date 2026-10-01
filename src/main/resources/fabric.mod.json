@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
-  "id": "emctable",
+  "id": "emcompacted",
   "version": "${version}",
-  "name": "EMC Table",
+  "name": "EMCompacted",
   "description": "Values every item in EMC. Feed items to the table to learn them and bank their EMC, then withdraw anything you have learnt.",
   "authors": [],
   "license": "ARR",
-  "icon": "assets/emctable/icon.png",
+  "icon": "assets/emcompacted/icon.png",
   "environment": "*",
   "entrypoints": {
     "main": ["dev.emctable.EmcTableMod"],

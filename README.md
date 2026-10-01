@@ -1,4 +1,4 @@
-# EMC Table (Fabric, Minecraft 26.2)
+# EMCompacted (Fabric, Minecraft 26.2)
 
 An EMC system inspired by ProjectE / Equivalent Exchange, without the rest of it. Every item
 gets an EMC value; a Transmutation Table lets you feed items in to bank their EMC and learn
@@ -34,7 +34,7 @@ EMC and knowledge are **per player**, saved with the world.
 ## EMC tooltips
 Every item with a value shows `EMC: <value>` in its tooltip (and `Stack EMC` for stacks).
 Press **H** (rebindable under Controls > EMC Table) to turn this on or off - it works in-game
-and inside inventories. The choice is saved in `config/emctable.properties`.
+and inside inventories. The choice is saved in `config/emcompacted.properties`.
 
 ## Crafting
 ```

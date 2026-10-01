@@ -7,5 +7,5 @@
     "E": "minecraft:ender_eye"
   },
   "pattern": ["ODO", "DED", "ODO"],
-  "result": { "id": "emctable:emc_table" }
+  "result": { "id": "emcompacted:emc_table" }
 }
