@@ -1,5 +1,6 @@
 package dev.emctable;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -151,6 +152,8 @@ public final class EmcValues {
         base.put("minecraft:water_bucket", 768L);
         base.put("minecraft:lava_bucket", 832L);
         base.put("minecraft:milk_bucket", 768L);
+        // other mods' raw materials; harmless when the mod is not installed
+        base.putAll(TechRebornCompat.baseValues());
         return base;
     }
 
@@ -174,37 +177,23 @@ public final class EmcValues {
         EmcTableMod.LOGGER.info("EMC Table: valued {} items", VALUES.size());
     }
 
+    /** What a recipe takes and makes, in a form every recipe kind can be reduced to. */
+    record Shape(List<Ingredient> ingredients, List<Integer> counts, Item output, int outputCount) {
+    }
+
     /** Returns true if this recipe let us give its result a new (or cheaper) value. */
     private static boolean derive(MinecraftServer server, Recipe<?> recipe) {
-        ItemStack result;
-        try {
-            // recipes no longer expose their result directly; read it from what the recipe book shows
-            List<RecipeDisplay> displays = recipe.display();
-            if (displays.isEmpty()) {
-                return false;
-            }
-            result = displays.getFirst().result()
-                    .resolveForFirstStack(SlotDisplayContext.fromLevel(server.overworld()));
-        } catch (Exception e) {
-            return false; // special/dynamic recipes have no fixed result
-        }
-        if (result == null || result.isEmpty() || result.getCount() <= 0) {
+        Shape shape = TechRebornCompat.isRebornRecipe(recipe)
+                ? TechRebornCompat.shape(recipe)
+                : vanillaShape(server, recipe);
+        if (shape == null || shape.ingredients().isEmpty() || shape.outputCount() <= 0) {
             return false;
         }
 
         long total = 0;
-        List<Ingredient> ingredients;
-        try {
-            ingredients = recipe.placementInfo().ingredients();
-        } catch (Exception e) {
-            return false;
-        }
-        if (ingredients.isEmpty()) {
-            return false;
-        }
-        for (Ingredient ingredient : ingredients) {
+        for (int i = 0; i < shape.ingredients().size(); i++) {
             long cheapest = Long.MAX_VALUE;
-            for (var entry : ingredient.items().toList()) {
+            for (var entry : shape.ingredients().get(i).items().toList()) {
                 Long value = VALUES.get(key(entry.value()));
                 if (value != null && value < cheapest) {
                     cheapest = value;
@@ -213,17 +202,38 @@ public final class EmcValues {
             if (cheapest == Long.MAX_VALUE) {
                 return false; // an ingredient has no value yet; try again next pass
             }
-            total += cheapest;
+            total += cheapest * shape.counts().get(i);
         }
 
-        long each = Math.max(1L, total / result.getCount());
-        String id = key(result.getItem());
+        long each = Math.max(1L, total / shape.outputCount());
+        String id = key(shape.output());
         Long existing = VALUES.get(id);
         if (existing == null || each < existing) {
             VALUES.put(id, each);
             return true;
         }
         return false;
+    }
+
+    /** Crafting, smelting, stonecutting and the like: one of each placed ingredient. */
+    private static Shape vanillaShape(MinecraftServer server, Recipe<?> recipe) {
+        try {
+            // recipes no longer expose their result directly; read it from what the recipe book shows
+            List<RecipeDisplay> displays = recipe.display();
+            if (displays.isEmpty()) {
+                return null;
+            }
+            ItemStack result = displays.getFirst().result()
+                    .resolveForFirstStack(SlotDisplayContext.fromLevel(server.overworld()));
+            if (result == null || result.isEmpty()) {
+                return null;
+            }
+            List<Ingredient> ingredients = recipe.placementInfo().ingredients();
+            return new Shape(ingredients, Collections.nCopies(ingredients.size(), 1),
+                    result.getItem(), result.getCount());
+        } catch (Exception e) {
+            return null; // special/dynamic recipes have no fixed result
+        }
     }
 
     /** A copy of every value, for sending to clients. */
